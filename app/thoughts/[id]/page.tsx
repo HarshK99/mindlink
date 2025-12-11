@@ -8,12 +8,14 @@ interface Node {
   id: string
   content: string
   children: Node[]
+  level: number
 }
 
 interface Thought {
   id: string
   title: string
   description?: string
+  createdat: string
 }
 
 export default function ThoughtPage() {
@@ -24,6 +26,8 @@ export default function ThoughtPage() {
   const [loading, setLoading] = useState(true)
   const [editingNode, setEditingNode] = useState<string | null>(null)
   const [editContent, setEditContent] = useState('')
+  const [longPressTimer, setLongPressTimer] = useState<NodeJS.Timeout | null>(null)
+  const [longPressNode, setLongPressNode] = useState<string | null>(null)
   const [addingToNode, setAddingToNode] = useState<string | null>(null)
   const [newNodeContent, setNewNodeContent] = useState('')
 
@@ -33,8 +37,15 @@ export default function ThoughtPage() {
   }, [thoughtId])
 
   const fetchThought = async () => {
-    // For now, just set a placeholder, or fetch from API if we add GET /api/thoughts/[id]
-    setThought({ id: thoughtId, title: 'Sample Thought', description: 'Description' })
+    try {
+      const res = await fetch(`/api/thoughts/${thoughtId}`)
+      if (res.ok) {
+        const data = await res.json()
+        setThought(data)
+      }
+    } catch (error) {
+      console.error('Failed to fetch thought:', error)
+    }
   }
 
   const fetchNodes = async () => {
@@ -94,8 +105,6 @@ export default function ThoughtPage() {
   }
 
   const deleteNode = async (nodeId: string) => {
-    if (!confirm('Delete this node and all its children?')) return
-
     try {
       const res = await fetch(`/api/nodes/${nodeId}`, { method: 'DELETE' })
       if (res.ok) {
@@ -106,11 +115,40 @@ export default function ThoughtPage() {
     }
   }
 
+  const handleMouseDown = (nodeId: string) => {
+    setLongPressTimer(setTimeout(() => {
+      setLongPressNode(nodeId)
+      if (confirm('Delete this node and all its children?')) {
+        deleteNode(nodeId)
+      }
+    }, 1000)) // 1 second long press
+  }
+
+  const handleMouseUp = () => {
+    if (longPressTimer) {
+      clearTimeout(longPressTimer)
+      setLongPressTimer(null)
+    }
+  }
+
+  const handleClick = (nodeId: string) => {
+    if (!longPressNode) {
+      setEditingNode(nodeId)
+      setEditContent(nodes.find(n => n.id === nodeId)?.content || '')
+    }
+    setLongPressNode(null)
+  }
+
   const renderNode = (node: Node, level = 0) => (
     <div key={node.id} className={`ml-${level * 4} mb-4`}>
-      <div className="flex items-center gap-2 p-3 bg-white border rounded shadow-sm">
+      <div
+        className="p-3 bg-white border rounded shadow-sm cursor-pointer hover:bg-gray-50"
+        onMouseDown={() => handleMouseDown(node.id)}
+        onMouseUp={handleMouseUp}
+        onClick={() => handleClick(node.id)}
+      >
         {editingNode === node.id ? (
-          <div className="flex-1 flex gap-2">
+          <div className="flex gap-2">
             <input
               type="text"
               value={editContent}
@@ -132,30 +170,7 @@ export default function ThoughtPage() {
             </button>
           </div>
         ) : (
-          <>
-            <span className="flex-1">{node.content}</span>
-            <button
-              onClick={() => {
-                setEditingNode(node.id)
-                setEditContent(node.content)
-              }}
-              className="px-2 py-1 bg-blue-500 text-white rounded text-sm"
-            >
-              Edit
-            </button>
-            <button
-              onClick={() => deleteNode(node.id)}
-              className="px-2 py-1 bg-red-500 text-white rounded text-sm"
-            >
-              Delete
-            </button>
-            <button
-              onClick={() => setAddingToNode(node.id)}
-              className="px-2 py-1 bg-purple-500 text-white rounded text-sm"
-            >
-              Add Child
-            </button>
-          </>
+          <span>{node.content}</span>
         )}
       </div>
 
@@ -189,6 +204,15 @@ export default function ThoughtPage() {
         </div>
       )}
 
+      <div className="ml-4 mt-1">
+        <button
+          onClick={() => setAddingToNode(node.id)}
+          className="text-blue-500 hover:text-blue-700 text-sm"
+        >
+          +
+        </button>
+      </div>
+
       {node.children.map((child) => renderNode(child, level + 1))}
     </div>
   )
@@ -211,10 +235,11 @@ export default function ThoughtPage() {
         <div className="mb-6">
           <button
             onClick={() => setAddingToNode('root')}
-            className="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600"
+            className="text-blue-500 hover:text-blue-700 text-sm"
           >
-            Add Root Reason
+            +
           </button>
+          <span className="ml-2 text-sm text-gray-600">Add root reason</span>
         </div>
 
         {addingToNode === 'root' && (

@@ -21,7 +21,8 @@ CREATE TABLE nodes (
   thought_id UUID NOT NULL REFERENCES thoughts(id) ON DELETE CASCADE,
   parent_id UUID REFERENCES nodes(id) ON DELETE CASCADE,
   content TEXT NOT NULL,
-  "order" INTEGER DEFAULT 0
+  "order" INTEGER DEFAULT 0,
+  level INTEGER DEFAULT 0
 );
 
 -- Insert sample data
@@ -38,16 +39,16 @@ INSERT INTO thoughts (id, user_id, title, description, createdat) VALUES
 ('550e8400-e29b-41d4-a716-446655440014', '550e8400-e29b-41d4-a716-446655440002', 'I strive for perfection in my work', 'I feel nothing I produce is ever good enough', '2025-10-20T09:15:00.000Z'),
 ('550e8400-e29b-41d4-a716-446655440015', '550e8400-e29b-41d4-a716-446655440002', 'I feel anxious around new people', 'I avoid conversations in unfamiliar settings', '2025-10-25T11:05:00.000Z');
 
-INSERT INTO nodes (id, thought_id, parent_id, content, "order") VALUES
-('550e8400-e29b-41d4-a716-446655440100', '550e8400-e29b-41d4-a716-446655440010', NULL, 'I worry my ideas might sound stupid', 0),
-('550e8400-e29b-41d4-a716-446655440101', '550e8400-e29b-41d4-a716-446655440010', '550e8400-e29b-41d4-a716-446655440100', 'I compare myself to more senior people', 0),
-('550e8400-e29b-41d4-a716-446655440102', '550e8400-e29b-41d4-a716-446655440010', '550e8400-e29b-41d4-a716-446655440100', 'I fear being judged if I''m wrong', 1),
-('550e8400-e29b-41d4-a716-446655440103', '550e8400-e29b-41d4-a716-446655440010', '550e8400-e29b-41d4-a716-446655440101', 'I assume others know more than me', 0),
-('550e8400-e29b-41d4-a716-446655440104', '550e8400-e29b-41d4-a716-446655440010', NULL, 'I stay silent even when I have solutions', 1),
-('550e8400-e29b-41d4-a716-446655440105', '550e8400-e29b-41d4-a716-446655440011', NULL, 'I keep switching between career options', 0),
-('550e8400-e29b-41d4-a716-446655440106', '550e8400-e29b-41d4-a716-446655440011', '550e8400-e29b-41d4-a716-446655440105', 'I fear choosing the wrong path', 0),
-('550e8400-e29b-41d4-a716-446655440107', '550e8400-e29b-41d4-a716-446655440011', '550e8400-e29b-41d4-a716-446655440105', 'I try to optimise every decision perfectly', 1),
-('550e8400-e29b-41d4-a716-446655440108', '550e8400-e29b-41d4-a716-446655440011', '550e8400-e29b-41d4-a716-446655440106', 'Past decisions didn''t go as planned', 0),
-('550e8400-e29b-41d4-a716-446655440109', '550e8400-e29b-41d4-a716-446655440012', NULL, 'I trust people very quickly', 0),
-('550e8400-e29b-41d4-a716-446655440110', '550e8400-e29b-41d4-a716-446655440012', '550e8400-e29b-41d4-a716-446655440109', 'I crave emotional closeness early', 0),
-('550e8400-e29b-41d4-a716-446655440111', '550e8400-e29b-41d4-a716-446655440012', '550e8400-e29b-41d4-a716-446655440109', 'I fear being alone', 1);
+INSERT INTO nodes (id, thought_id, parent_id, content, "order", level) VALUES
+('550e8400-e29b-41d4-a716-446655440100', '550e8400-e29b-41d4-a716-446655440010', NULL, 'I worry my ideas might sound stupid', 0, 0),
+('550e8400-e29b-41d4-a716-446655440101', '550e8400-e29b-41d4-a716-446655440010', '550e8400-e29b-41d4-a716-446655440100', 'I compare myself to more senior people', 0, 1),
+('550e8400-e29b-41d4-a716-446655440102', '550e8400-e29b-41d4-a716-446655440010', '550e8400-e29b-41d4-a716-446655440100', 'I fear being judged if I''m wrong', 1, 1),
+('550e8400-e29b-41d4-a716-446655440103', '550e8400-e29b-41d4-a716-446655440010', '550e8400-e29b-41d4-a716-446655440101', 'I assume others know more than me', 0, 2),
+('550e8400-e29b-41d4-a716-446655440104', '550e8400-e29b-41d4-a716-446655440010', NULL, 'I stay silent even when I have solutions', 1, 0),
+('550e8400-e29b-41d4-a716-446655440105', '550e8400-e29b-41d4-a716-446655440011', NULL, 'I keep switching between career options', 0, 0),
+('550e8400-e29b-41d4-a716-446655440106', '550e8400-e29b-41d4-a716-446655440011', '550e8400-e29b-41d4-a716-446655440105', 'I fear choosing the wrong path', 0, 1),
+('550e8400-e29b-41d4-a716-446655440107', '550e8400-e29b-41d4-a716-446655440011', '550e8400-e29b-41d4-a716-446655440105', 'I try to optimise every decision perfectly', 1, 1),
+('550e8400-e29b-41d4-a716-446655440108', '550e8400-e29b-41d4-a716-446655440011', '550e8400-e29b-41d4-a716-446655440106', 'Past decisions didn''t go as planned', 0, 2),
+('550e8400-e29b-41d4-a716-446655440109', '550e8400-e29b-41d4-a716-446655440012', NULL, 'I trust people very quickly', 0, 0),
+('550e8400-e29b-41d4-a716-446655440110', '550e8400-e29b-41d4-a716-446655440012', '550e8400-e29b-41d4-a716-446655440109', 'I crave emotional closeness early', 0, 1),
+('550e8400-e29b-41d4-a716-446655440111', '550e8400-e29b-41d4-a716-446655440012', '550e8400-e29b-41d4-a716-446655440109', 'I fear being alone', 1, 1);
