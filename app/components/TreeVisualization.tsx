@@ -117,7 +117,7 @@ const TreeVisualization: React.FC<TreeVisualizationProps> = ({
             <div className="flex justify-center mt-1">
               <button
                 onClick={() => onAdd(nodeDatum.id)}
-                className={`rounded-full bg-blue-500 text-white flex items-center justify-center hover:bg-blue-600 ${isMobile ? 'w-6 h-6 text-sm' : 'w-8 h-8 text-lg'} font-bold`}
+                className={`rounded-full bg-blue-500 text-white flex items-center justify-center hover:bg-blue-600 border-2 border-blue-600 ${isMobile ? 'w-6 h-6 text-sm' : 'w-8 h-8 text-lg'} font-bold`}
               >
                 +
               </button>
