@@ -48,15 +48,29 @@ export async function GET(
 ) {
   try {
     const { id } = await params
+    
+    // Fetch thought
+    const thoughtResult = await pool.query(
+      'SELECT id, title FROM thoughts WHERE id = $1',
+      [id]
+    )
+    
+    if (thoughtResult.rows.length === 0) {
+      return NextResponse.json({ error: 'Thought not found' }, { status: 404 })
+    }
+    
+    const thought = thoughtResult.rows[0]
+    
+    // Fetch nodes
     const { rows } = await pool.query(
       'SELECT * FROM nodes WHERE thought_id = $1 ORDER BY "order" ASC',
       [id]
     )
 
     const tree = buildTree(rows)
-    return NextResponse.json(tree)
+    return NextResponse.json({ thought, nodes: tree })
   } catch (error) {
     console.error(error)
-    return NextResponse.json({ error: 'Failed to fetch nodes' }, { status: 500 })
+    return NextResponse.json({ error: 'Failed to fetch data' }, { status: 500 })
   }
 }

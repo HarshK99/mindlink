@@ -22,7 +22,7 @@ interface Thought {
 export default function ThoughtPage() {
   const params = useParams()
   const thoughtId = params.id as string
-  const [thought, setThought] = useState<Thought | null>(null)
+  const [thought, setThought] = useState<{ id: string, title: string } | null>(null)
   const [nodes, setNodes] = useState<Node[]>([])
   const [loading, setLoading] = useState(true)
   const [editingNode, setEditingNode] = useState<string | null>(null)
@@ -33,31 +33,19 @@ export default function ThoughtPage() {
   const [newNodeContent, setNewNodeContent] = useState('')
 
   useEffect(() => {
-    fetchThought()
-    fetchNodes()
+    fetchData()
   }, [thoughtId])
 
-  const fetchThought = async () => {
-    try {
-      const res = await fetch(`/api/thoughts/${thoughtId}`)
-      if (res.ok) {
-        const data = await res.json()
-        setThought(data)
-      }
-    } catch (error) {
-      console.error('Failed to fetch thought:', error)
-    }
-  }
-
-  const fetchNodes = async () => {
+  const fetchData = async () => {
     try {
       const res = await fetch(`/api/thoughts/${thoughtId}/nodes`)
       if (res.ok) {
         const data = await res.json()
-        setNodes(data)
+        setThought(data.thought)
+        setNodes(data.nodes)
       }
     } catch (error) {
-      console.error('Failed to fetch nodes:', error)
+      console.error('Failed to fetch data:', error)
     } finally {
       setLoading(false)
     }
@@ -79,7 +67,7 @@ export default function ThoughtPage() {
       if (res.ok) {
         setNewNodeContent('')
         setAddingToNode(null)
-        fetchNodes()
+        fetchData()
       }
     } catch (error) {
       console.error('Failed to add node:', error)
@@ -98,7 +86,7 @@ export default function ThoughtPage() {
       if (res.ok) {
         setEditingNode(null)
         setEditContent('')
-        fetchNodes()
+        fetchData()
       }
     } catch (error) {
       console.error('Failed to update node:', error)
@@ -109,7 +97,7 @@ export default function ThoughtPage() {
     try {
       const res = await fetch(`/api/nodes/${nodeId}`, { method: 'DELETE' })
       if (res.ok) {
-        fetchNodes()
+        fetchData()
       }
     } catch (error) {
       console.error('Failed to delete node:', error)
