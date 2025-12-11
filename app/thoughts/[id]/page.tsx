@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { useParams } from 'next/navigation'
 import Link from 'next/link'
+import TreeVisualization from '../../components/TreeVisualization'
 
 interface Node {
   id: string
@@ -115,6 +116,14 @@ export default function ThoughtPage() {
     }
   }
 
+  const handleEdit = (id: string) => {
+    const node = nodes.find(n => n.id === id)
+    if (node) {
+      setEditingNode(id)
+      setEditContent(node.content)
+    }
+  }
+
   const handleMouseDown = (nodeId: string) => {
     setLongPressTimer(setTimeout(() => {
       setLongPressNode(nodeId)
@@ -139,106 +148,25 @@ export default function ThoughtPage() {
     setLongPressNode(null)
   }
 
-  const renderTree = () => {
-    // Group nodes by level
-    const levels: { [key: number]: Node[] } = {}
-    const processNode = (node: Node) => {
-      if (!levels[node.level]) levels[node.level] = []
-      levels[node.level].push(node)
-      node.children.forEach(processNode)
-    }
-    nodes.forEach(processNode)
-
-    return (
-      <div className="relative">
-
-        {Object.keys(levels).sort((a, b) => parseInt(a) - parseInt(b)).map(levelStr => {
-          const level = parseInt(levelStr)
-          const levelNodes = levels[level]
-          return (
-            <div key={level} className="flex justify-center gap-8 mb-8 relative" style={{ minHeight: '100px' }}>
-              {levelNodes.map(node => (
-                <div key={node.id} className="relative">
-                  <div
-                    className="p-3 bg-white border rounded shadow-sm cursor-pointer hover:bg-gray-50 min-w-[200px] text-center"
-                    onMouseDown={() => handleMouseDown(node.id)}
-                    onMouseUp={handleMouseUp}
-                    onClick={() => handleClick(node.id)}
-                  >
-                    {editingNode === node.id ? (
-                      <div className="flex gap-2">
-                        <input
-                          type="text"
-                          value={editContent}
-                          onChange={(e) => setEditContent(e.target.value)}
-                          className="flex-1 p-1 border rounded"
-                          autoFocus
-                        />
-                        <button
-                          onClick={() => updateNode(node.id)}
-                          className="px-2 py-1 bg-green-500 text-white rounded text-sm"
-                        >
-                          Save
-                        </button>
-                        <button
-                          onClick={() => setEditingNode(null)}
-                          className="px-2 py-1 bg-gray-500 text-white rounded text-sm"
-                        >
-                          Cancel
-                        </button>
-                      </div>
-                    ) : (
-                      <span>{node.content}</span>
-                    )}
-                  </div>
-
-                  {/* + button below */}
-                  <div className="flex justify-center mt-2">
-                    <button
-                      onClick={() => setAddingToNode(node.id)}
-                      className="text-blue-500 hover:text-blue-700 text-sm"
-                    >
-                      +
-                    </button>
-                  </div>
-
-                  {addingToNode === node.id && (
-                    <div className="absolute top-full mt-2 p-3 bg-gray-50 border rounded shadow z-10 min-w-[200px]">
-                      <input
-                        type="text"
-                        placeholder="New reason..."
-                        value={newNodeContent}
-                        onChange={(e) => setNewNodeContent(e.target.value)}
-                        className="w-full p-2 border rounded mb-2"
-                        autoFocus
-                      />
-                      <div className="flex gap-2">
-                        <button
-                          onClick={() => addNode(node.id)}
-                          className="px-3 py-1 bg-green-500 text-white rounded"
-                        >
-                          Add
-                        </button>
-                        <button
-                          onClick={() => {
-                            setAddingToNode(null)
-                            setNewNodeContent('')
-                          }}
-                          className="px-3 py-1 bg-gray-500 text-white rounded"
-                        >
-                          Cancel
-                        </button>
-                      </div>
-                    </div>
-                  )}
-                </div>
-              ))}
-            </div>
-          )
-        })}
-      </div>
-    )
-  }
+  const renderTree = () => (
+    <TreeVisualization
+      nodes={nodes}
+      thought={thought!}
+      onEdit={handleEdit}
+      onDelete={deleteNode}
+      onAdd={setAddingToNode}
+      editingNode={editingNode}
+      editContent={editContent}
+      onEditChange={setEditContent}
+      onSaveEdit={updateNode}
+      onCancelEdit={() => setEditingNode(null)}
+      addingToNode={addingToNode}
+      newNodeContent={newNodeContent}
+      onNewNodeChange={setNewNodeContent}
+      onAddNode={addNode}
+      onCancelAdd={() => { setAddingToNode(null); setNewNodeContent('') }}
+    />
+  )
 
   if (loading) return <div className="p-8">Loading...</div>
 
