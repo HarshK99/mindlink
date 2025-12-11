@@ -9,9 +9,20 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'thought_id and content are required' }, { status: 400 })
     }
 
+    let level = 0
+    if (parent_id) {
+      const { rows } = await pool.query(
+        'SELECT level FROM nodes WHERE id = $1',
+        [parent_id]
+      )
+      if (rows.length > 0) {
+        level = rows[0].level + 1
+      }
+    }
+
     const { rows } = await pool.query(
-      'INSERT INTO nodes (thought_id, parent_id, content, "order") VALUES ($1, $2, $3, $4) RETURNING *',
-      [thought_id, parent_id || null, content, order || 0]
+      'INSERT INTO nodes (thought_id, parent_id, content, "order", level) VALUES ($1, $2, $3, $4, $5) RETURNING *',
+      [thought_id, parent_id || null, content, order || 0, level]
     )
 
     return NextResponse.json(rows[0], { status: 201 })

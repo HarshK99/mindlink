@@ -6,14 +6,13 @@ import Link from 'next/link'
 interface Thought {
   id: string
   title: string
-  description: string
-  createdAt: string
+  description?: string
+  createdat: string
 }
 
 export default function Home() {
   const [thoughts, setThoughts] = useState<Thought[]>([])
   const [title, setTitle] = useState('')
-  const [description, setDescription] = useState('')
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
@@ -36,19 +35,18 @@ export default function Home() {
 
   const addThought = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (!title || !description) return
+    if (!title) return
 
     try {
       const res = await fetch('/api/thoughts', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ title, description })
+        body: JSON.stringify({ title })
       })
       if (res.ok) {
         const newThought = await res.json()
         setThoughts([newThought, ...thoughts])
         setTitle('')
-        setDescription('')
       }
     } catch (error) {
       console.error('Failed to add thought:', error)
@@ -74,15 +72,6 @@ export default function Home() {
               required
             />
           </div>
-          <div className="mb-4">
-            <textarea
-              placeholder="Description"
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-              className="w-full p-2 border rounded h-24"
-              required
-            />
-          </div>
           <button type="submit" className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">
             Add Thought
           </button>
@@ -93,9 +82,8 @@ export default function Home() {
             <Link key={thought.id} href={`/thoughts/${thought.id}`}>
               <div className="p-6 bg-white rounded-lg shadow hover:shadow-md transition-shadow cursor-pointer">
                 <h3 className="text-xl font-semibold mb-2">{thought.title}</h3>
-                <p className="text-gray-600 mb-2">{thought.description}</p>
                 <p className="text-sm text-gray-400">
-                  {new Date(thought.createdAt).toLocaleDateString()}
+                  {thought.createdat ? new Date(thought.createdat).toLocaleDateString() : 'No date'}
                 </p>
               </div>
             </Link>
