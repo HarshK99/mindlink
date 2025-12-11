@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useParams } from 'next/navigation'
 import Link from 'next/link'
 
@@ -30,11 +30,31 @@ export default function ThoughtPage() {
   const [longPressNode, setLongPressNode] = useState<string | null>(null)
   const [addingToNode, setAddingToNode] = useState<string | null>(null)
   const [newNodeContent, setNewNodeContent] = useState('')
+  const containerRef = useRef<HTMLDivElement>(null)
+  const nodeRefs = useRef<{ [key: string]: HTMLDivElement }>({})
+  const [nodePositions, setNodePositions] = useState<{ [key: string]: { x: number, y: number } }>({})
 
   useEffect(() => {
     fetchThought()
     fetchNodes()
   }, [thoughtId])
+
+  useEffect(() => {
+    if (!containerRef.current) return
+    const containerRect = containerRef.current.getBoundingClientRect()
+    const positions: { [key: string]: { x: number, y: number } } = {}
+    Object.keys(nodeRefs.current).forEach(id => {
+      const el = nodeRefs.current[id]
+      if (el) {
+        const rect = el.getBoundingClientRect()
+        positions[id] = {
+          x: rect.left - containerRect.left + rect.width / 2,
+          y: rect.top - containerRect.top + rect.height / 2
+        }
+      }
+    })
+    setNodePositions(positions)
+  }, [nodes])
 
   const fetchThought = async () => {
     try {
@@ -139,83 +159,144 @@ export default function ThoughtPage() {
     setLongPressNode(null)
   }
 
-  const renderNode = (node: Node, level = 0) => (
-    <div key={node.id} className={`ml-${level * 4} mb-4`}>
-      <div
-        className="p-3 bg-white border rounded shadow-sm cursor-pointer hover:bg-gray-50"
-        onMouseDown={() => handleMouseDown(node.id)}
-        onMouseUp={handleMouseUp}
-        onClick={() => handleClick(node.id)}
-      >
-        {editingNode === node.id ? (
-          <div className="flex gap-2">
-            <input
-              type="text"
-              value={editContent}
-              onChange={(e) => setEditContent(e.target.value)}
-              className="flex-1 p-1 border rounded"
-              autoFocus
-            />
-            <button
-              onClick={() => updateNode(node.id)}
-              className="px-2 py-1 bg-green-500 text-white rounded text-sm"
-            >
-              Save
-            </button>
-            <button
-              onClick={() => setEditingNode(null)}
-              className="px-2 py-1 bg-gray-500 text-white rounded text-sm"
-            >
-              Cancel
-            </button>
-          </div>
-        ) : (
-          <span>{node.content}</span>
-        )}
+  const renderTree = () => {
+    // Group nodes by level
+    const levels: { [key: number]: Node[] } = {}
+    const nodePositions: { [key: string]: { x: number, y: number } } = {}
+    const processNode = (node: Node) => {
+      if (!levels[node.level]) levels[node.level] = []
+      levels[node.level].push(node)
+      node.children.forEach(processNode)
+    }
+    nodes.forEach(processNode)
+
+    const connections: { from: string, to: string }[] = []
+    nodes.forEach(node => {
+      node.children.forEach(child => {
+        connections.push({ from: node.id, to: child.id })
+      })
+    })
+
+    return (
+      <div ref={containerRef} className="relative">
+        <svg className="absolute inset-0 pointer-events-none" style={{ zIndex: -1 }}>
+          {connections.map((conn, i) => {
+            const fromX = nodePositions[conn.from]?.x || 0
+            const fromY = nodePositions[conn.from]?.y || 0
+            const toX = nodePositions[conn.to]?.x || 0
+            const toY = nodePositions[conn.to]?.y || 0
+
+            if (!fromX || !fromY || !toX || !toY) return null
+
+            const midX = (fromX + toX) / 2
+            const midY = (fromY + toY) / 2
+
+            return (
+              <path
+                key={i}
+                d={`M ${fromX} ${fromY} Q ${midX} ${midY} ${toX} ${toY}`}
+                stroke="gray"
+                strokeWidth="2"
+                fill="none"
+                markerEnd="url(#arrowhead)"
+              />
+            )
+          })}
+          <defs>
+            <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+              <polygon points="0 0, 10 3.5, 0 7" fill="gray" />
+            </marker>
+          </defs>
+        </svg>
+
+        {Object.keys(levels).sort((a, b) => parseInt(a) - parseInt(b)).map(levelStr => {
+          const level = parseInt(levelStr)
+          const levelNodes = levels[level]
+          return (
+            <div key={level} className="flex justify-center gap-8 mb-8 relative" style={{ minHeight: '100px' }}>
+              {levelNodes.map(node => (
+                <div key={node.id} className="relative">
+                  <div
+                    ref={el => { if (el) nodeRefs.current[node.id] = el }}
+                    className="p-3 bg-white border rounded shadow-sm cursor-pointer hover:bg-gray-50 min-w-[200px] text-center"
+                    onMouseDown={() => handleMouseDown(node.id)}
+                    onMouseUp={handleMouseUp}
+                    onClick={() => handleClick(node.id)}
+                  >
+                    {editingNode === node.id ? (
+                      <div className="flex gap-2">
+                        <input
+                          type="text"
+                          value={editContent}
+                          onChange={(e) => setEditContent(e.target.value)}
+                          className="flex-1 p-1 border rounded"
+                          autoFocus
+                        />
+                        <button
+                          onClick={() => updateNode(node.id)}
+                          className="px-2 py-1 bg-green-500 text-white rounded text-sm"
+                        >
+                          Save
+                        </button>
+                        <button
+                          onClick={() => setEditingNode(null)}
+                          className="px-2 py-1 bg-gray-500 text-white rounded text-sm"
+                        >
+                          Cancel
+                        </button>
+                      </div>
+                    ) : (
+                      <span>{node.content}</span>
+                    )}
+                  </div>
+
+                  {/* + button below */}
+                  <div className="flex justify-center mt-2">
+                    <button
+                      onClick={() => setAddingToNode(node.id)}
+                      className="text-blue-500 hover:text-blue-700 text-sm"
+                    >
+                      +
+                    </button>
+                  </div>
+
+                  {addingToNode === node.id && (
+                    <div className="absolute top-full mt-2 p-3 bg-gray-50 border rounded shadow z-10 min-w-[200px]">
+                      <input
+                        type="text"
+                        placeholder="New reason..."
+                        value={newNodeContent}
+                        onChange={(e) => setNewNodeContent(e.target.value)}
+                        className="w-full p-2 border rounded mb-2"
+                        autoFocus
+                      />
+                      <div className="flex gap-2">
+                        <button
+                          onClick={() => addNode(node.id)}
+                          className="px-3 py-1 bg-green-500 text-white rounded"
+                        >
+                          Add
+                        </button>
+                        <button
+                          onClick={() => {
+                            setAddingToNode(null)
+                            setNewNodeContent('')
+                          }}
+                          className="px-3 py-1 bg-gray-500 text-white rounded"
+                        >
+                          Cancel
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          )
+        })}
       </div>
-
-      {addingToNode === node.id && (
-        <div className="ml-4 mt-2 p-3 bg-gray-50 border rounded">
-          <input
-            type="text"
-            placeholder="New reason..."
-            value={newNodeContent}
-            onChange={(e) => setNewNodeContent(e.target.value)}
-            className="w-full p-2 border rounded mb-2"
-            autoFocus
-          />
-          <div className="flex gap-2">
-            <button
-              onClick={() => addNode(node.id)}
-              className="px-3 py-1 bg-green-500 text-white rounded"
-            >
-              Add
-            </button>
-            <button
-              onClick={() => {
-                setAddingToNode(null)
-                setNewNodeContent('')
-              }}
-              className="px-3 py-1 bg-gray-500 text-white rounded"
-            >
-              Cancel
-            </button>
-          </div>
-        </div>
-      )}
-
-      <div className="ml-4 mt-1">
-        <button
-          onClick={() => setAddingToNode(node.id)}
-          className="text-blue-500 hover:text-blue-700 text-sm"
-        >
-          +
-        </button>
-      </div>
-
-      {node.children.map((child) => renderNode(child, level + 1))}
-    </div>
-  )
+    )
+  }
 
   if (loading) return <div className="p-8">Loading...</div>
 
@@ -273,7 +354,7 @@ export default function ThoughtPage() {
         )}
 
         <div className="space-y-2">
-          {nodes.map((node) => renderNode(node))}
+          {renderTree()}
         </div>
       </div>
     </div>
