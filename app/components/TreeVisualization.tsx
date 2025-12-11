@@ -104,7 +104,7 @@ const TreeVisualization: React.FC<TreeVisualizationProps> = ({
             <div className="flex justify-center mt-2">
               <button
                 onClick={() => onAdd(nodeDatum.id)}
-                className="text-blue-500 hover:text-blue-700 text-sm"
+                className="w-8 h-8 rounded-full bg-blue-500 text-white flex items-center justify-center hover:bg-blue-600 text-lg font-bold"
               >
                 +
               </button>
