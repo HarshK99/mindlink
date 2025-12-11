@@ -72,7 +72,7 @@ export default function ThoughtPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           thought_id: thoughtId,
-          parent_id: parentId === thought!.id ? null : parentId,
+          parent_id: parentId === thought?.id ? null : parentId,
           content: newNodeContent
         })
       })
@@ -151,7 +151,7 @@ export default function ThoughtPage() {
   const renderTree = () => (
     <TreeVisualization
       nodes={nodes}
-      thought={thought!}
+      thought={thought}
       onEdit={handleEdit}
       onDelete={deleteNode}
       onAdd={setAddingToNode}
