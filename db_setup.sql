@@ -11,7 +11,7 @@ CREATE TABLE thoughts (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
   title TEXT NOT NULL,
-  description TEXT NOT NULL,
+  description TEXT,
   createdAt TIMESTAMPTZ DEFAULT NOW()
 );
 

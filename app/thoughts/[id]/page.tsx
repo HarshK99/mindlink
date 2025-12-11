@@ -13,7 +13,7 @@ interface Node {
 interface Thought {
   id: string
   title: string
-  description: string
+  description?: string
 }
 
 export default function ThoughtPage() {
@@ -205,7 +205,6 @@ export default function ThoughtPage() {
         {thought && (
           <div className="mb-8 p-6 bg-white rounded-lg shadow">
             <h1 className="text-3xl font-bold mb-2">{thought.title}</h1>
-            <p className="text-gray-600">{thought.description}</p>
           </div>
         )}
 

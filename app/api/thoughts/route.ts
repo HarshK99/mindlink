@@ -21,13 +21,13 @@ export async function POST(request: NextRequest) {
   try {
     const { title, description } = await request.json()
 
-    if (!title || !description) {
-      return NextResponse.json({ error: 'Title and description are required' }, { status: 400 })
+    if (!title) {
+      return NextResponse.json({ error: 'Title is required' }, { status: 400 })
     }
 
     const { rows } = await pool.query(
       'INSERT INTO thoughts (user_id, title, description, "createdAt") VALUES ($1, $2, $3, $4) RETURNING *',
-      [USER_ID, title, description, new Date().toISOString()]
+      [USER_ID, title, description || null, new Date().toISOString()]
     )
 
     return NextResponse.json(rows[0], { status: 201 })
