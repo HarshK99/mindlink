@@ -7,7 +7,7 @@ interface Thought {
   id: string
   title: string
   description?: string
-  createdAt: string
+  createdat: string
 }
 
 export default function Home() {
@@ -83,7 +83,7 @@ export default function Home() {
               <div className="p-6 bg-white rounded-lg shadow hover:shadow-md transition-shadow cursor-pointer">
                 <h3 className="text-xl font-semibold mb-2">{thought.title}</h3>
                 <p className="text-sm text-gray-400">
-                  {new Date(thought.createdAt).toLocaleDateString()}
+                  {thought.createdat ? new Date(thought.createdat).toLocaleDateString() : 'No date'}
                 </p>
               </div>
             </Link>

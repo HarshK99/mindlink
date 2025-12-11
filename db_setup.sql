@@ -3,7 +3,7 @@ CREATE TABLE users (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   name TEXT NOT NULL,
   email TEXT UNIQUE NOT NULL,
-  createdAt TIMESTAMPTZ DEFAULT NOW()
+  createdat TIMESTAMPTZ DEFAULT NOW()
 );
 
 -- Create thoughts table
@@ -12,7 +12,7 @@ CREATE TABLE thoughts (
   user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
   title TEXT NOT NULL,
   description TEXT,
-  createdAt TIMESTAMPTZ DEFAULT NOW()
+  createdat TIMESTAMPTZ DEFAULT NOW()
 );
 
 -- Create nodes table
@@ -25,12 +25,12 @@ CREATE TABLE nodes (
 );
 
 -- Insert sample data
-INSERT INTO users (id, name, email, createdAt) VALUES
+INSERT INTO users (id, name, email, createdat) VALUES
 ('550e8400-e29b-41d4-a716-446655440000', 'Harsh K', 'harsh@example.com', '2025-12-11T09:00:00.000Z'),
 ('550e8400-e29b-41d4-a716-446655440001', 'Aarav Sharma', 'aarav@example.com', '2025-11-22T14:20:00.000Z'),
 ('550e8400-e29b-41d4-a716-446655440002', 'Meera Jain', 'meera@example.com', '2025-10-15T18:45:00.000Z');
 
-INSERT INTO thoughts (id, user_id, title, description, createdAt) VALUES
+INSERT INTO thoughts (id, user_id, title, description, createdat) VALUES
 ('550e8400-e29b-41d4-a716-446655440010', '550e8400-e29b-41d4-a716-446655440000', 'I hesitate to speak in meetings', 'I stay quiet even when I have ideas worth sharing', '2025-12-10T10:00:00.000Z'),
 ('550e8400-e29b-41d4-a716-446655440011', '550e8400-e29b-41d4-a716-446655440000', 'I keep overthinking career decisions', 'I bounce between options and lose momentum', '2025-12-11T08:30:00.000Z'),
 ('550e8400-e29b-41d4-a716-446655440012', '550e8400-e29b-41d4-a716-446655440001', 'I get attached to people too quickly', 'Emotional dependence forms very fast for me', '2025-12-01T12:45:00.000Z'),
