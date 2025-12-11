@@ -72,7 +72,7 @@ export default function ThoughtPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           thought_id: thoughtId,
-          parent_id: parentId,
+          parent_id: parentId === thought!.id ? null : parentId,
           content: newNodeContent
         })
       })
@@ -176,52 +176,6 @@ export default function ThoughtPage() {
         <Link href="/" className="text-blue-500 hover:underline mb-4 inline-block">
           ← Back to Thoughts
         </Link>
-
-        {thought && (
-          <div className="mb-8 p-6 bg-white rounded-lg shadow">
-            <h1 className="text-3xl font-bold mb-2">{thought.title}</h1>
-          </div>
-        )}
-
-        <div className="mb-6">
-          <button
-            onClick={() => setAddingToNode('root')}
-            className="text-blue-500 hover:text-blue-700 text-sm"
-          >
-            +
-          </button>
-          <span className="ml-2 text-sm text-gray-600">Add root reason</span>
-        </div>
-
-        {addingToNode === 'root' && (
-          <div className="mb-6 p-4 bg-gray-50 border rounded">
-            <input
-              type="text"
-              placeholder="New root reason..."
-              value={newNodeContent}
-              onChange={(e) => setNewNodeContent(e.target.value)}
-              className="w-full p-2 border rounded mb-2"
-              autoFocus
-            />
-            <div className="flex gap-2">
-              <button
-                onClick={() => addNode(null)}
-                className="px-3 py-1 bg-green-500 text-white rounded"
-              >
-                Add
-              </button>
-              <button
-                onClick={() => {
-                  setAddingToNode(null)
-                  setNewNodeContent('')
-                }}
-                className="px-3 py-1 bg-gray-500 text-white rounded"
-              >
-                Cancel
-              </button>
-            </div>
-          </div>
-        )}
 
         <div className="space-y-2">
           {renderTree()}

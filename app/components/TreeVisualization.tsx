@@ -100,16 +100,14 @@ const TreeVisualization: React.FC<TreeVisualizationProps> = ({
           ) : (
             <span onClick={() => onEdit(nodeDatum.id)} onContextMenu={(e) => { e.preventDefault(); onDelete(nodeDatum.id) }}>{nodeDatum.name}</span>
           )}
-          {nodeDatum.id !== thought.id && (
-            <div className="flex justify-center mt-2">
-              <button
-                onClick={() => onAdd(nodeDatum.id)}
-                className="w-8 h-8 rounded-full bg-blue-500 text-white flex items-center justify-center hover:bg-blue-600 text-lg font-bold"
-              >
-                +
-              </button>
-            </div>
-          )}
+          <div className="flex justify-center mt-2">
+            <button
+              onClick={() => onAdd(nodeDatum.id)}
+              className="w-8 h-8 rounded-full bg-blue-500 text-white flex items-center justify-center hover:bg-blue-600 text-lg font-bold"
+            >
+              +
+            </button>
+          </div>
           {isAdding && (
             <div className="mt-2 p-3 bg-gray-50 border rounded min-w-[200px]">
               <input
