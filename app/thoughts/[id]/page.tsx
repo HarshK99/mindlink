@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect } from 'react'
 import { useParams } from 'next/navigation'
 import Link from 'next/link'
 
@@ -30,31 +30,11 @@ export default function ThoughtPage() {
   const [longPressNode, setLongPressNode] = useState<string | null>(null)
   const [addingToNode, setAddingToNode] = useState<string | null>(null)
   const [newNodeContent, setNewNodeContent] = useState('')
-  const containerRef = useRef<HTMLDivElement>(null)
-  const nodeRefs = useRef<{ [key: string]: HTMLDivElement }>({})
-  const [nodePositions, setNodePositions] = useState<{ [key: string]: { x: number, y: number } }>({})
 
   useEffect(() => {
     fetchThought()
     fetchNodes()
   }, [thoughtId])
-
-  useEffect(() => {
-    if (!containerRef.current) return
-    const containerRect = containerRef.current.getBoundingClientRect()
-    const positions: { [key: string]: { x: number, y: number } } = {}
-    Object.keys(nodeRefs.current).forEach(id => {
-      const el = nodeRefs.current[id]
-      if (el) {
-        const rect = el.getBoundingClientRect()
-        positions[id] = {
-          x: rect.left - containerRect.left + rect.width / 2,
-          y: rect.top - containerRect.top + rect.height / 2
-        }
-      }
-    })
-    setNodePositions(positions)
-  }, [nodes])
 
   const fetchThought = async () => {
     try {
@@ -162,7 +142,6 @@ export default function ThoughtPage() {
   const renderTree = () => {
     // Group nodes by level
     const levels: { [key: number]: Node[] } = {}
-    const nodePositions: { [key: string]: { x: number, y: number } } = {}
     const processNode = (node: Node) => {
       if (!levels[node.level]) levels[node.level] = []
       levels[node.level].push(node)
@@ -170,44 +149,8 @@ export default function ThoughtPage() {
     }
     nodes.forEach(processNode)
 
-    const connections: { from: string, to: string }[] = []
-    nodes.forEach(node => {
-      node.children.forEach(child => {
-        connections.push({ from: node.id, to: child.id })
-      })
-    })
-
     return (
-      <div ref={containerRef} className="relative">
-        <svg className="absolute inset-0 pointer-events-none" style={{ zIndex: -1 }}>
-          {connections.map((conn, i) => {
-            const fromX = nodePositions[conn.from]?.x || 0
-            const fromY = nodePositions[conn.from]?.y || 0
-            const toX = nodePositions[conn.to]?.x || 0
-            const toY = nodePositions[conn.to]?.y || 0
-
-            if (!fromX || !fromY || !toX || !toY) return null
-
-            const midX = (fromX + toX) / 2
-            const midY = (fromY + toY) / 2
-
-            return (
-              <path
-                key={i}
-                d={`M ${fromX} ${fromY} Q ${midX} ${midY} ${toX} ${toY}`}
-                stroke="gray"
-                strokeWidth="2"
-                fill="none"
-                markerEnd="url(#arrowhead)"
-              />
-            )
-          })}
-          <defs>
-            <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
-              <polygon points="0 0, 10 3.5, 0 7" fill="gray" />
-            </marker>
-          </defs>
-        </svg>
+      <div className="relative">
 
         {Object.keys(levels).sort((a, b) => parseInt(a) - parseInt(b)).map(levelStr => {
           const level = parseInt(levelStr)
@@ -217,7 +160,6 @@ export default function ThoughtPage() {
               {levelNodes.map(node => (
                 <div key={node.id} className="relative">
                   <div
-                    ref={el => { if (el) nodeRefs.current[node.id] = el }}
                     className="p-3 bg-white border rounded shadow-sm cursor-pointer hover:bg-gray-50 min-w-[200px] text-center"
                     onMouseDown={() => handleMouseDown(node.id)}
                     onMouseUp={handleMouseUp}
