@@ -197,27 +197,7 @@ const TreeVisualization: React.FC<TreeVisualizationProps> = ({
             <div className={`p-${isMobile ? 2 : 3} text-center`}>
               {editingNode === nodeId ? (
                 <div className="flex flex-col gap-1">
-                  <input
-                    type="text"
-                    value={editContent}
-                    onChange={(e) => onEditChange(e.target.value)}
-                    className="border rounded px-2 py-1 text-sm"
-                    autoFocus
-                  />
-                  <div className="flex gap-1 justify-center">
-                    <button
-                      onClick={() => onSaveEdit(nodeId)}
-                      className="px-2 py-1 bg-green-500 text-white rounded text-xs"
-                    >
-                      Save
-                    </button>
-                    <button
-                      onClick={() => onCancelEdit()}
-                      className="px-2 py-1 bg-gray-500 text-white rounded text-xs"
-                    >
-                      Cancel
-                    </button>
-                  </div>
+                  <span className={`${isMobile ? 'text-sm' : 'text-base'} italic text-gray-500`}>Editing...</span>
                 </div>
               ) : isThoughtNode ? (
                 <span className={`font-bold text-lg ${isMobile ? 'text-base' : 'text-lg'}`}>{displayNode.content}</span>
@@ -277,29 +257,8 @@ const TreeVisualization: React.FC<TreeVisualizationProps> = ({
               )}
 
               {isAdding && (
-                <div className={`mt-${isMobile ? 1 : 2} p-${isMobile ? 2 : 3} bg-gray-50 border rounded`}>
-                  <input
-                    type="text"
-                    placeholder="New reason..."
-                    value={newNodeContent}
-                    onChange={(e) => onNewNodeChange(e.target.value)}
-                    className="w-full border rounded px-2 py-1 mb-1 text-sm"
-                    autoFocus
-                  />
-                  <div className="flex gap-1">
-                    <button
-                      onClick={() => onAddNode(nodeId)}
-                      className="px-2 py-1 bg-green-500 text-white rounded text-xs"
-                    >
-                      Add
-                    </button>
-                    <button
-                      onClick={() => onCancelAdd()}
-                      className="px-2 py-1 bg-gray-500 text-white rounded text-xs"
-                    >
-                      Cancel
-                    </button>
-                  </div>
+                <div className="flex flex-col gap-1">
+                  <span className={`${isMobile ? 'text-sm' : 'text-base'} italic text-gray-500`}>Adding...</span>
                 </div>
               )}
             </div>
@@ -325,6 +284,68 @@ const TreeVisualization: React.FC<TreeVisualizationProps> = ({
                 className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600"
               >
                 Delete
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Edit Modal */}
+      {editingNode && (
+        <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 p-4 z-50 shadow-lg">
+          <div className="max-w-md mx-auto">
+            <h3 className="text-lg font-semibold mb-3 text-center">Edit Node</h3>
+            <textarea
+              value={editContent}
+              onChange={(e) => onEditChange(e.target.value)}
+              className="w-full border border-gray-300 rounded-lg px-4 py-3 text-base resize-none focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              rows={3}
+              placeholder="Enter node content..."
+              autoFocus
+            />
+            <div className="flex gap-3 mt-4">
+              <button
+                onClick={() => onCancelEdit()}
+                className="flex-1 py-3 px-4 text-gray-600 border border-gray-300 rounded-lg hover:bg-gray-50 font-medium"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={() => onSaveEdit(editingNode)}
+                className="flex-1 py-3 px-4 bg-blue-500 text-white rounded-lg hover:bg-blue-600 font-medium"
+              >
+                Save Changes
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Add Node Modal */}
+      {addingToNode && (
+        <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 p-4 z-50 shadow-lg">
+          <div className="max-w-md mx-auto">
+            <h3 className="text-lg font-semibold mb-3 text-center">Add New Node</h3>
+            <textarea
+              value={newNodeContent}
+              onChange={(e) => onNewNodeChange(e.target.value)}
+              className="w-full border border-gray-300 rounded-lg px-4 py-3 text-base resize-none focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
+              rows={3}
+              placeholder="Enter new node content..."
+              autoFocus
+            />
+            <div className="flex gap-3 mt-4">
+              <button
+                onClick={() => onCancelAdd()}
+                className="flex-1 py-3 px-4 text-gray-600 border border-gray-300 rounded-lg hover:bg-gray-50 font-medium"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={() => onAddNode(addingToNode)}
+                className="flex-1 py-3 px-4 bg-green-500 text-white rounded-lg hover:bg-green-600 font-medium"
+              >
+                Add Node
               </button>
             </div>
           </div>
