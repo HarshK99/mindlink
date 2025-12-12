@@ -9,7 +9,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'thought_id and content are required' }, { status: 400 })
     }
 
-    let level = 0
+    let level = 1 // Root reasons start at level 1
     if (parent_id) {
       const { rows } = await pool.query(
         'SELECT level FROM nodes WHERE id = $1',

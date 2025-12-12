@@ -12,7 +12,6 @@
     "next": "16.0.8",
     "pg": "^8.16.3",
     "react": "19.2.1",
-    "react-d3-tree": "^3.6.6",
     "react-dom": "19.2.1"
   },
   "devDependencies": {
