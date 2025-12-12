@@ -214,16 +214,22 @@ const TreeVisualization: React.FC<TreeVisualizationProps> = ({
                   </span>
                   
                   {selectedNode === nodeId && (
-                    <div className="flex gap-1">
+                    <div className="flex gap-1 mt-1 z-10 relative">
                       <button
-                        onClick={() => handleEditClick(nodeId)}
-                        className="px-2 py-1 bg-blue-500 text-white rounded text-xs hover:bg-blue-600"
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          handleEditClick(nodeId)
+                        }}
+                        className="px-2 py-1 bg-blue-500 text-white rounded text-xs hover:bg-blue-600 shadow-sm"
                       >
                         ✏️ Edit
                       </button>
                       <button
-                        onClick={() => handleDeleteClick(nodeId)}
-                        className="px-2 py-1 bg-red-500 text-white rounded text-xs hover:bg-red-600"
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          handleDeleteClick(nodeId)
+                        }}
+                        className="px-2 py-1 bg-red-500 text-white rounded text-xs hover:bg-red-600 shadow-sm"
                       >
                         🗑️ Delete
                       </button>
@@ -233,7 +239,7 @@ const TreeVisualization: React.FC<TreeVisualizationProps> = ({
               )}
 
               {isThoughtNode ? (
-                <div className={`flex justify-center mt-${isMobile ? 1 : 2}`}>
+                <div className="flex justify-center mt-2">
                   <button
                     onClick={() => onAdd(nodeId)}
                     className={`rounded-full bg-blue-500 text-white flex items-center justify-center hover:bg-blue-600 border-2 border-blue-600 font-bold ${
@@ -244,7 +250,7 @@ const TreeVisualization: React.FC<TreeVisualizationProps> = ({
                   </button>
                 </div>
               ) : (
-                <div className={`flex justify-center mt-${isMobile ? 1 : 2}`}>
+                <div className="flex justify-center mt-2">
                   <button
                     onClick={() => onAdd(nodeId)}
                     className={`rounded-full bg-blue-500 text-white flex items-center justify-center hover:bg-blue-600 border-2 border-blue-600 font-bold ${
