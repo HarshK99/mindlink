@@ -7,6 +7,7 @@ interface Node {
   parent_id: string | null
   content: string
   order: number
+  level: number
   children?: Node[]
 }
 
@@ -31,6 +32,13 @@ function buildTree(nodes: Node[]): Node[] {
       roots.push(node)
     }
   })
+
+  // Recalculate levels based on tree structure
+  const recalculateLevels = (node: Node, level: number) => {
+    node.level = level
+    node.children!.forEach(child => recalculateLevels(child, level + 1))
+  }
+  roots.forEach(root => recalculateLevels(root, 1)) // Root reasons start at level 1
 
   // Sort children by order
   const sortChildren = (node: Node) => {
