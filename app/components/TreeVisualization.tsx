@@ -66,12 +66,10 @@ const TreeVisualization: React.FC<TreeVisualizationProps> = ({
 
   const handleEditClick = (nodeId: string) => {
     onEdit(nodeId)
-    setSelectedNode(null) // Deselect after action
   }
 
   const handleDeleteClick = (nodeId: string) => {
     setShowDeleteConfirm(nodeId)
-    setSelectedNode(null) // Deselect after action
   }
 
   const handleDeleteConfirm = (nodeId: string) => {
@@ -220,7 +218,7 @@ const TreeVisualization: React.FC<TreeVisualizationProps> = ({
                           e.stopPropagation()
                           handleEditClick(nodeId)
                         }}
-                        className="px-2 py-1 bg-blue-500 text-white rounded text-xs hover:bg-blue-600 shadow-sm"
+                        className="px-3 py-2 bg-blue-500 text-white rounded text-sm hover:bg-blue-600 shadow-sm"
                       >
                         ✏️ Edit
                       </button>
@@ -229,7 +227,7 @@ const TreeVisualization: React.FC<TreeVisualizationProps> = ({
                           e.stopPropagation()
                           handleDeleteClick(nodeId)
                         }}
-                        className="px-2 py-1 bg-red-500 text-white rounded text-xs hover:bg-red-600 shadow-sm"
+                        className="px-3 py-2 bg-red-500 text-white rounded text-sm hover:bg-red-600 shadow-sm"
                       >
                         🗑️ Delete
                       </button>
@@ -280,13 +278,13 @@ const TreeVisualization: React.FC<TreeVisualizationProps> = ({
             <p className="text-gray-600 mb-4">Are you sure you want to delete this node? This action cannot be undone.</p>
             <div className="flex gap-3 justify-end">
               <button
-                onClick={() => setShowDeleteConfirm(null)}
+                onClick={() => { setShowDeleteConfirm(null); setSelectedNode(null) }}
                 className="px-4 py-2 text-gray-600 border border-gray-300 rounded hover:bg-gray-50"
               >
                 Cancel
               </button>
               <button
-                onClick={() => handleDeleteConfirm(showDeleteConfirm)}
+                onClick={() => { handleDeleteConfirm(showDeleteConfirm); setSelectedNode(null) }}
                 className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600"
               >
                 Delete
@@ -298,8 +296,8 @@ const TreeVisualization: React.FC<TreeVisualizationProps> = ({
 
       {/* Edit Modal */}
       {editingNode && (
-        <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 p-4 z-50 shadow-lg">
-          <div className="max-w-md mx-auto">
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 max-w-md mx-4">
             <h3 className="text-lg font-semibold mb-3 text-center">Edit Node</h3>
             <textarea
               value={editContent}
@@ -311,13 +309,13 @@ const TreeVisualization: React.FC<TreeVisualizationProps> = ({
             />
             <div className="flex gap-3 mt-4">
               <button
-                onClick={() => onCancelEdit()}
+                onClick={() => { onCancelEdit(); setSelectedNode(null) }}
                 className="flex-1 py-3 px-4 text-gray-600 border border-gray-300 rounded-lg hover:bg-gray-50 font-medium"
               >
                 Cancel
               </button>
               <button
-                onClick={() => onSaveEdit(editingNode)}
+                onClick={() => { onSaveEdit(editingNode); setSelectedNode(null) }}
                 className="flex-1 py-3 px-4 bg-blue-500 text-white rounded-lg hover:bg-blue-600 font-medium"
               >
                 Save Changes
@@ -342,13 +340,13 @@ const TreeVisualization: React.FC<TreeVisualizationProps> = ({
             />
             <div className="flex gap-3 mt-4">
               <button
-                onClick={() => onCancelAdd()}
+                onClick={() => { onCancelAdd(); setSelectedNode(null) }}
                 className="flex-1 py-3 px-4 text-gray-600 border border-gray-300 rounded-lg hover:bg-gray-50 font-medium"
               >
                 Cancel
               </button>
               <button
-                onClick={() => onAddNode(addingToNode)}
+                onClick={() => { onAddNode(addingToNode); setSelectedNode(null) }}
                 className="flex-1 py-3 px-4 bg-green-500 text-white rounded-lg hover:bg-green-600 font-medium"
               >
                 Add Node
