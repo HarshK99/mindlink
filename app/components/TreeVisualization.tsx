@@ -43,6 +43,8 @@ const TreeVisualization: React.FC<TreeVisualizationProps> = ({
   onCancelAdd
 }) => {
   const [windowWidth, setWindowWidth] = useState(0)
+  const [selectedNode, setSelectedNode] = useState<string | null>(null)
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState<string | null>(null)
   const containerRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
@@ -51,6 +53,31 @@ const TreeVisualization: React.FC<TreeVisualizationProps> = ({
     window.addEventListener('resize', handleResize)
     return () => window.removeEventListener('resize', handleResize)
   }, [])
+
+  const handleNodeClick = (nodeId: string) => {
+    if (selectedNode === nodeId) {
+      // If already selected, deselect
+      setSelectedNode(null)
+    } else {
+      // Select the node to show actions
+      setSelectedNode(nodeId)
+    }
+  }
+
+  const handleEditClick = (nodeId: string) => {
+    onEdit(nodeId)
+    setSelectedNode(null) // Deselect after action
+  }
+
+  const handleDeleteClick = (nodeId: string) => {
+    setShowDeleteConfirm(nodeId)
+    setSelectedNode(null) // Deselect after action
+  }
+
+  const handleDeleteConfirm = (nodeId: string) => {
+    onDelete(nodeId)
+    setShowDeleteConfirm(null)
+  }
 
   const isMobile = windowWidth < 768
 
@@ -195,13 +222,34 @@ const TreeVisualization: React.FC<TreeVisualizationProps> = ({
               ) : isThoughtNode ? (
                 <span className={`font-bold text-lg ${isMobile ? 'text-base' : 'text-lg'}`}>{displayNode.content}</span>
               ) : (
-                <span
-                  onClick={() => onEdit(nodeId)}
-                  onContextMenu={(e) => { e.preventDefault(); onDelete(nodeId) }}
-                  className={`${isMobile ? 'text-sm' : 'text-base'}`}
-                >
-                  {displayNode.content}
-                </span>
+                <div className="flex flex-col items-center gap-1">
+                  <span
+                    onClick={() => handleNodeClick(nodeId)}
+                    className={`${isMobile ? 'text-sm' : 'text-base'} cursor-pointer select-none ${
+                      selectedNode === nodeId ? 'bg-blue-50 border border-blue-200 rounded px-2 py-1' : ''
+                    }`}
+                    style={{ userSelect: 'none', WebkitUserSelect: 'none' }}
+                  >
+                    {displayNode.content}
+                  </span>
+                  
+                  {selectedNode === nodeId && (
+                    <div className="flex gap-1">
+                      <button
+                        onClick={() => handleEditClick(nodeId)}
+                        className="px-2 py-1 bg-blue-500 text-white rounded text-xs hover:bg-blue-600"
+                      >
+                        ✏️ Edit
+                      </button>
+                      <button
+                        onClick={() => handleDeleteClick(nodeId)}
+                        className="px-2 py-1 bg-red-500 text-white rounded text-xs hover:bg-red-600"
+                      >
+                        🗑️ Delete
+                      </button>
+                    </div>
+                  )}
+                </div>
               )}
 
               {isThoughtNode ? (
@@ -258,6 +306,30 @@ const TreeVisualization: React.FC<TreeVisualizationProps> = ({
           </div>
         )
       })}
+      
+      {/* Delete Confirmation Dialog */}
+      {showDeleteConfirm && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 max-w-sm mx-4">
+            <h3 className="text-lg font-semibold mb-2">Delete Node</h3>
+            <p className="text-gray-600 mb-4">Are you sure you want to delete this node? This action cannot be undone.</p>
+            <div className="flex gap-3 justify-end">
+              <button
+                onClick={() => setShowDeleteConfirm(null)}
+                className="px-4 py-2 text-gray-600 border border-gray-300 rounded hover:bg-gray-50"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={() => handleDeleteConfirm(showDeleteConfirm)}
+                className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600"
+              >
+                Delete
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
